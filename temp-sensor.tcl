@@ -3,10 +3,14 @@
 #                            2010 +-+ mables                                |
 #                      https://github.com/mables                            |
 #---------------------------------------------------------------------------+
+# Todo:
+# - Add ascii graph to show min/max temperatues
+# v1.2 11.11.2011
+# - Added timestamp to max/min values
 # v1.1 14.07.2011
 # - Added temp stat trigger with min/max temperatures
 # v1 2010
-# - Made initial script with only !temp trigger.
+# - Created the initial script with only the !temp trigger/function.
 #---------------------------------------------------------------------------+
 #                Table structure for table temperatures                     |
 #---------------------------------------------------------------------------+
@@ -88,26 +92,31 @@ proc pub:stat {nick uhost handle chan txt} {
 
         global highestTemp
         global lowestTemp
-        set msgString " "
+	set countloop 0
 
-        foreach 24htemp [mysqlsel $mysqlHandler "SELECT MAX(t.temperature) AS max,MIN(t.temperature) AS min,ts.name FROM temperatures t,temperatures_sensors ts WHERE t.sensor_id=ts.id AND ts.id=1 AND timestamp > NOW() - INTERVAL 24 HOUR GROUP BY ts.name" -list] {
-                set maxtemp [string range [lindex $24htemp 0] 0 3]
-                set mintemp [string range [lindex $24htemp 1] 0 3]
-                set sensor [lindex $24htemp 2]
-
-                if {$maxtemp>0} {
-                        set maxtemp "\00304$maxtemp°C"
-                } else {
-                        set maxtemp "\00302$maxtemp°C"
-                }
-                if {$mintemp>0} {
-                        set mintemp "\00304$mintemp°C"
-                } else {
-                        set mintemp "\00302$mintemp°C"
-                }
-
-                # ADD the temp to array
-                append msgString "\00300$sensor\003: Last 24 hours, max: $maxtemp\003 low: $mintemp\003 "
+	foreach 24htemp [mysqlsel $mysqlHandler "(SELECT t.temperature as temp,DATE_FORMAT(t.timestamp,'%a %T') as time,ts.name as name FROM temperatures as t, temperatures_sensors as ts WHERE t.sensor_id=ts.id AND ts.id=1 AND t.timestamp > NOW() - INTERVAL 24 HOUR ORDER BY t.temperature DESC LIMIT 1) UNION ALL (SELECT t.temperature as temp,DATE_FORMAT(t.timestamp,'%a %T') as time,ts.name as name FROM temperatures as t, temperatures_sensors as ts WHERE t.sensor_id=ts.id AND ts.id=1 AND t.timestamp > NOW() - INTERVAL 24 HOUR ORDER BY t.temperature ASC LIMIT 1)" -list] {
+		incr countloop
+		set temp [string range [lindex $24htemp 0] 0 3]
+		set time [lindex $24htemp 1]
+		set sensor [lindex $24htemp 2]
+		if {$countloop == 1} {
+			set msgString "\00300$sensor\003: Last 24 hours, "
+		}
+		if {$countloop == 1} {
+			if {$temp>0} {
+				set maxtemp "\00304$temp°C"
+			} else {
+				set maxtemp "\00302$temp°C"
+			}
+			append msgString "max: $maxtemp\003 (\00300$time\003) "
+		} elseif {$countloop == 2} {
+			if {$temp>0} {
+				set mintemp "\00304$temp°C"
+			} else {
+				set mintemp "\00302$temp°C"
+			}
+			append msgString "min: $mintemp\003 (\00300$time\003) "
+		}
         }
          
         foreach allhigh [mysqlsel $mysqlHandler "SELECT DATE_FORMAT(t.timestamp, GET_FORMAT(DATE,'EUR')) AS time,t.temperature AS temp,ts.name FROM temperatures t,temperatures_sensors ts WHERE t.sensor_id=ts.id AND ts.id=1 ORDER BY t.temperature DESC LIMIT 1" -list] {
@@ -124,7 +133,7 @@ proc pub:stat {nick uhost handle chan txt} {
                 set lowtemp "\00302[string range [lindex $alllow 1] 0 3]°C"
 
 
-                append msgString2 "low: $lowtemp \003($lowtime\003)\003 "
+                append msgString2 "  min: $lowtemp \003($lowtime\003)\003 "
 
         }
 
