@@ -1,10 +1,14 @@
 #---------------------------------------------------------------------------+
-#                 VARIOUS TCL SCRIPTs TO BE USED IN EGGDROPs                |
+#                                 EggTemp                                   |
+#        Lookup temperatures in a DB and print them to a IRC channel        |
 #                                                                           |
-#                            +-+ 200?-2011 +-+                              |
+#               To be used with the temperature sensor project              |
+#                  for displaying local temperatures to a                   |
+#                         IRC channel on command.                           |
 #                                                                           |
+#                            +-+ 2010-201? +-+                              |
 #                                                                           |
-#                        https://github.com/mables                          |
+#                     https://github.com/marcusnilsen                       |
 #                                                                           |
 #---------------------------------------------------------------------------+
 
