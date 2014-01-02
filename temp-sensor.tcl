@@ -5,6 +5,7 @@
 #---------------------------------------------------------------------------+
 # Todo:
 # - Add ascii graph to show min/max temperatues
+# - Check for decimals on low temp
 # v1.2 11.11.2011
 # - Added timestamp to max/min values
 # v1.1 14.07.2011
@@ -130,7 +131,7 @@ proc pub:stat {nick uhost handle chan txt} {
 
         foreach alllow [mysqlsel $mysqlHandler "SELECT DATE_FORMAT(t.timestamp, GET_FORMAT(DATE,'EUR')) AS time,t.temperature AS temp,ts.name FROM temperatures t,temperatures_sensors ts WHERE t.sensor_id=ts.id AND ts.id=1 ORDER BY t.temperature ASC LIMIT 1" -list] {
                 set lowtime "\00300[lindex $alllow 0]"
-                set lowtemp "\00302[string range [lindex $alllow 1] 0 3]°C"
+                set lowtemp "\00302[string range [lindex $alllow 1] 0 4]°C"
 
 
                 append msgString2 "  min: $lowtemp \003($lowtime\003)\003 "
