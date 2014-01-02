@@ -43,9 +43,9 @@ package require mysqltcl
 # To get db status, include this:
 global mysqlstatus
 
-# Bindings
-bind pub - $triggerTemp pub:temp
-bind pub - $triggerStat pub:stat
+# Bindings -- Only for bot owner and partyline users!
+bind pub p|n $triggerTemp pub:temp
+bind pub p|n $triggerStat pub:stat
 
 # Functions
 proc pub:temp {nick uhost handle chan txt} {
