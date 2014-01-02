@@ -1,7 +1,7 @@
 #---------------------------------------------------------------------------+
 #                    TEMP SENSOR SCRIPT - MYSQL LOOKUP                      |
-#                            2010 +-+ mables                                |
-#                      https://github.com/mables                            |
+#                           +-+ 2010-201? +-+                               |
+#                     https://github.com/marcusnilsen                       |
 #---------------------------------------------------------------------------+
 # Todo:
 # - Add ascii graph to show min/max temperatues
@@ -97,12 +97,13 @@ proc pub:stat {nick uhost handle chan txt} {
 
 	foreach 24htemp [mysqlsel $mysqlHandler "(SELECT t.temperature as temp,DATE_FORMAT(t.timestamp,'%a %T') as time,ts.name as name FROM temperatures as t, temperatures_sensors as ts WHERE t.sensor_id=ts.id AND ts.id=1 AND t.timestamp > NOW() - INTERVAL 24 HOUR ORDER BY t.temperature DESC LIMIT 1) UNION ALL (SELECT t.temperature as temp,DATE_FORMAT(t.timestamp,'%a %T') as time,ts.name as name FROM temperatures as t, temperatures_sensors as ts WHERE t.sensor_id=ts.id AND ts.id=1 AND t.timestamp > NOW() - INTERVAL 24 HOUR ORDER BY t.temperature ASC LIMIT 1)" -list] {
 		incr countloop
-		set temp [string range [lindex $24htemp 0] 0 3]
+		set temp [string range [lindex $24htemp 0] 0 4]
 		set time [lindex $24htemp 1]
 		set sensor [lindex $24htemp 2]
 		if {$countloop == 1} {
 			set msgString "\00300$sensor\003: Last 24 hours, "
 		}
+
 		if {$countloop == 1} {
 			if {$temp>0} {
 				set maxtemp "\00304$temp°C"
